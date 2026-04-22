@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Universe</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+  :root {
+    --bg: #09090f;
+    --bg2: #111118;
+    --bg3: #18181f;
+    --bg4: #1e1e28;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #f0f0f8;
+    --text2: #9090a8;
+    --text3: #5a5a70;
+    --accent: #7c6af7;
+    --accent2: #a78bfa;
+    --accentglow: rgba(124,106,247,0.2);
+    --teal: #2dd4bf;
+    --tealglow: rgba(45,212,191,0.15);
+    --coral: #fb7185;
+    --coralglow: rgba(251,113,133,0.15);
+    --amber: #fbbf24;
+    --ambglow: rgba(251,191,36,0.15);
+    --green: #4ade80;
+    --greenglow: rgba(74,222,128,0.15);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+    --nav-w: 72px;
+    --transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    display: flex;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR NAV ── */
+  .sidebar {
+    width: var(--nav-w);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 6px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--teal));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+  }
+  .logo svg { width: 22px; height: 22px; }
+
+  .nav-sep { width: 32px; height: 1px; background: var(--border); margin: 6px 0; }
+
+  .nav-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+  }
+  .nav-btn svg { width: 20px; height: 20px; transition: var(--transition); }
+  .nav-btn .nav-label { font-size: 8px; font-family: var(--font-mono); letter-spacing: 0.03em; line-height: 1; }
+  .nav-btn:hover { background: var(--bg3); color: var(--text2); }
+  .nav-btn.active { background: var(--accentglow); color: var(--accent2); }
+  .nav-btn.active::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    margin-left: var(--nav-w);
+    flex: 1;
+    overflow-y: auto;
+    height: 100vh;
+    background: var(--bg);
+  }
+
+  .section { display: none; min-height: 100vh; }
+  .section.active { display: block; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(9,9,15,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+  }
+  .topbar-left { display: flex; flex-direction: column; gap: 2px; }
+  .section-eyebrow { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
+  .section-title { font-family: var(--font-head); font-size: 22px; font-weight: 700; color: var(--text); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .chip {
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* ── CONTENT AREA ── */
+  .content { padding: 28px 32px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: var(--transition);
+  }
+  .card:hover { border-color: var(--border2); }
+
+  .card-glass {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(4px);
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn:hover { background: var(--bg4); border-color: rgba(255,255,255,0.18); }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn-accent:hover { background: #8b7af8; border-color: #8b7af8; }
+
+  .btn-teal {
+    background: rgba(45,212,191,0.15);
+    border-color: rgba(45,212,191,0.3);
+    color: var(--teal);
+  }
+  .btn-teal:hover { background: rgba(45,212,191,0.22); }
+
+  .btn-coral {
+    background: rgba(251,113,133,0.15);
+    border-color: rgba(251,113,133,0.3);
+    color: var(--coral);
+  }
+
+  /* ── INPUTS ── */
+  input, textarea, select {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 9px 13px;
+    outline: none;
+    transition: var(--transition);
+    width: 100%;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accentglow); }
+  select option { background: var(--bg3); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── BADGE ── */
+  .badge {
+    padding: 3px 9px;
+    border-radius: 50px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+  }
+  .badge-accent { background: var(--accentglow); color: var(--accent2); border: 1px solid rgba(124,106,247,0.3); }
+  .badge-teal { background: var(--tealglow); color: var(--teal); border: 1px solid rgba(45,212,191,0.3); }
+  .badge-coral { background: var(--coralglow); color: var(--coral); border: 1px solid rgba(251,113,133,0.3); }
+  .badge-amber { background: var(--ambglow); color: var(--amber); border: 1px solid rgba(251,191,36,0.3); }
+  .badge-green { background: var(--greenglow); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+
+  /* ── GRID UTILS ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  .flex { display: flex; }
+  .flex-col { display: flex; flex-direction: column; }
+  .items-center { align-items: center; }
+  .gap-8 { gap: 8px; }
+  .gap-12 { gap: 12px; }
+  .gap-16 { gap: 16px; }
+  .gap-20 { gap: 20px; }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-12 { margin-bottom: 12px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-20 { margin-bottom: 20px; }
+  .mb-24 { margin-bottom: 24px; }
+
+  /* ── SECTION HEADERS ── */
+  .sh { font-family: var(--font-head); font-size: 13px; font-weight: 600; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 12px; }
+  .sh2 { font-family: var(--font-head); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .sub { font-size: 13px; color: var(--text3); margin-bottom: 16px; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 8px; }
+
+  /* ═══════════════════════════════════
+     MODULE 1: MEMORY ROOMS
+  ═══════════════════════════════════ */
+  .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 14px; margin-bottom: 24px; }
+  .room-card {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px 18px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .room-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 2px;
+  }
+  .room-card.c1 { background: rgba(124,106,247,0.06); }
+  .room-card.c1::before { background: linear-gradient(90deg,var(--accent),transparent); }
+  .room-card.c2 { background: rgba(45,212,191,0.06); }
+  .room-card.c2::before { background: linear-gradient(90deg,var(--teal),transparent); }
+  .room-card.c3 { background: rgba(251,113,133,0.06); }
+  .room-card.c3::before { background: linear-gradient(90deg,var(--coral),transparent); }
+  .room-card.c4 { background: rgba(251,191,36,0.06); }
+  .room-card.c4::before { background: linear-gradient(90deg,var(--amber),transparent); }
+  .room-card.c5 { background: rgba(74,222,128,0.06); }
+  .room-card.c5::before { background: linear-gradient(90deg,var(--green),transparent); }
+  .room-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+  .room-card .room-icon { font-size: 28px; margin-bottom: 8px; }
+  .room-card .room-name { font-family: var(--font-head); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .room-card .room-count { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
+  .room-card .room-preview { font-size: 12px; color: var(--text3); margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .add-room-btn {
+    border: 1px dashed var(--border2);
+    border-radius: var(--radius);
+    padding: 20px 18px;
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 140px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    transition: var(--transition);
+  }
+  .add-room-btn:hover { border-color: var(--accent); color: var(--accent2); background: var(--accentglow); }
+
+  .mem-panel {
+    display: none;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .mem-panel.open { display: block; }
+  .mem-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .mem-panel-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; }
+
+  .memory-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; margin-bottom: 16px; }
+  .memory-item {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+  }
+  .memory-item:hover { border-color: var(--border2); background: var(--bg4); }
+  .memory-item .mi-tag { font-family: var(--font-mono); font-size: 10px; color: var(--text3); margin-bottom: 6px; }
+  .memory-item .mi-text { color: var(--text); line-height: 1.5; font-size: 12px; }
+  .memory-item .mi-del {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 14px;
+    opacity: 0;
+    transition: var(--transition);
+    padding: 2px;
+    line-height: 1;
+  }
+  .memory-item:hover .mi-del { opacity: 1; }
+
+  .recall-mode {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+  }
+  .recall-card {
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 40px 24px;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+  }
+  .recall-card:hover { border-color: var(--accent); }
+  .recall-card .rc-front { font-size: 16px; color: var(--text); }
+  .recall-card .rc-back { display: none; font-size: 14px; color: var(--text2); }
+  .recall-card.flipped .rc-front { display: none; }
+  .recall-card.flipped .rc-back { display: block; }
+  .recall-hint { font-family: var(--font-mono); font-size: 10px; color: var(--text3); margin-bottom: 16px; }
+
+  /* ═══════════════════════════════════
+     MODULE 2: STUDY MOOD
+  ═══════════════════════════════════ */
+  .mood-selector { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 28px; }
+  .mood-btn {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg2);
+    padding: 16px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text2);
+    font-family: var(--font-body);
+  }
+  .mood-btn .emoji { font-size: 28px; }
+  .mood-btn .mood-name { font-size: 12px; font-weight: 500; }
+  .mood-btn:hover { border-color: var(--border2); background: var(--bg3); color: var(--text); }
+  .mood-btn.selected.m-energized { background: var(--accentglow); border-color: rgba(124,106,247,0.4); color: var(--accent2); }
+  .mood-btn.selected.m-calm { background: var(--tealglow); border-color: rgba(45,212,191,0.4); color: var(--teal); }
+  .mood-btn.selected.m-tired { background: var(--ambglow); border-color: rgba(251,191,36,0.4); color: var(--amber); }
+  .mood-btn.selected.m-anxious { background: var(--coralglow); border-color: rgba(251,113,133,0.4); color: var(--coral); }
+  .mood-btn.selected.m-curious { background: var(--greenglow); border-color: rgba(74,222,128,0.4); color: var(--green); }
+
+  .mood-result { display: none; }
+  .mood-result.visible { display: block; }
+  .mood-result-hero {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mood-result-hero::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.15;
+    pointer-events: none;
+  }
+  .mood-result-hero.e::after { background: var(--accent); }
+  .mood-result-hero.c::after { background: var(--teal); }
+  .mood-result-hero.t::after { background: var(--amber); }
+  .mood-result-hero.a::after { background: var(--coral); }
+  .mood-result-hero.u::after { background: var(--green); }
+
+  .method-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    transition: var(--transition);
+  }
+  .method-card:hover { border-color: var(--border2); }
+  .method-icon { width: 40px; height: 40px; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .method-body .method-name { font-family: var(--font-head); font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .method-body .method-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+  .env-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 16px; }
+  .env-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+  }
+  .env-label { font-family: var(--font-mono); font-size: 10px; color: var(--text3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .env-val { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--text); }
+
+  /* ═══════════════════════════════════
+     MODULE 3: FUTURE PLANNER
+  ═══════════════════════════════════ */
+  .habit-builder { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+  .habit-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+  .habit-label { font-size: 12px; color: var(--text2); width: 120px; flex-shrink: 0; }
+  .habit-slider { flex: 1; -webkit-appearance: none; appearance: none; height: 4px; background: var(--bg4); border-radius: 4px; outline: none; border: none; padding: 0; cursor: pointer; }
+  .habit-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 0 0 3px var(--accentglow); }
+  .habit-val { font-family: var(--font-mono); font-size: 12px; color: var(--accent2); width: 40px; text-align: right; flex-shrink: 0; }
+
+  .timeline-container {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; background:linear-gradient(180deg,var(--accent),var(--teal),rgba(45,212,191,0.1)); border-radius:2px; }
+  .tl-item { position: relative; margin-bottom: 20px; }
+  .tl-dot { position:absolute; left:-24px; top:2px; width:12px; height:12px; border-radius:50%; border:2px solid var(--bg2); }
+  .tl-time { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .tl-title { font-family: var(--font-head); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .tl-desc { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+  .outcome-chart {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .chart-bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-bottom: 8px; }
+  .chart-bar {
+    flex: 1;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.5s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+    cursor: pointer;
+  }
+  .chart-bar:hover::after { content: attr(data-val); position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 10px; font-family: var(--font-mono); color: var(--text); background: var(--bg4); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  .chart-labels { display: flex; gap: 8px; }
+  .chart-label { flex: 1; text-align: center; font-size: 10px; color: var(--text3); font-family: var(--font-mono); }
+
+  .outcome-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 16px; }
+  .ostat { background: var(--bg3); border-radius: var(--radius-sm); padding: 14px; }
+  .ostat-val { font-family: var(--font-head); font-size: 24px; font-weight: 800; }
+  .ostat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* ═══════════════════════════════════
+     MODULE 4: FOCUS MODE
+  ═══════════════════════════════════ */
+  .focus-hero {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .focus-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center top, rgba(124,106,247,0.08), transparent 70%);
+    pointer-events: none;
+  }
+
+  .timer-ring {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 24px;
+    position: relative;
+  }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring-track { fill: none; stroke: var(--bg4); stroke-width: 8; }
+  .timer-ring-progress { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .timer-display {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .timer-time { font-family: var(--font-head); font-size: 36px; font-weight: 800; color: var(--text); }
+  .timer-phase { font-family: var(--font-mono); font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .focus-controls { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
+  .focus-presets { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+
+  .session-log {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .session-entry {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .session-entry:last-child { border-bottom: none; }
+  .se-icon { width: 32px; height: 32px; background: var(--accentglow); border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .se-body { flex: 1; }
+  .se-label { font-size: 13px; color: var(--text); font-weight: 500; }
+  .se-meta { font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
+  .se-duration { font-family: var(--font-mono); font-size: 13px; color: var(--accent2); }
+
+  .focus-ambience {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .amb-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+  .amb-btn {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg3);
+    padding: 12px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--text2);
+  }
+  .amb-btn:hover { border-color: var(--border2); color: var(--text); }
+  .amb-btn.on { border-color: rgba(124,106,247,0.4); background: var(--accentglow); color: var(--accent2); }
+  .amb-icon { font-size: 20px; margin-bottom: 4px; }
+  .amb-name { font-size: 10px; font-family: var(--font-mono); }
+
+  /* ═══════════════════════════════════
+     MODULE 5: LEARNING MAP
+  ═══════════════════════════════════ */
+  .map-canvas-wrap {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .map-canvas { position: relative; height: 360px; }
+
+  .map-node {
+    position: absolute;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-head);
+  }
+  .map-node:hover { transform: scale(1.08); z-index: 10; }
+  .map-node .mn-label { font-size: 11px; font-weight: 700; color: var(--text); margin-top: 6px; position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+  .map-node .mn-icon { font-size: 18px; }
+
+  .map-connector { position: absolute; pointer-events: none; }
+
+  .milestone-list { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .ms-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .ms-item:last-child { border-bottom: none; }
+  .ms-item:hover .ms-title { color: var(--accent2); }
+  .ms-ring {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .ms-ring svg { position: absolute; inset: 0; }
+  .ms-ring .pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700; }
+  .ms-body { flex: 1; }
+  .ms-title { font-size: 14px; font-weight: 500; color: var(--text); transition: var(--transition); }
+  .ms-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .ms-xp { font-family: var(--font-mono); font-size: 12px; color: var(--accent2); display: flex; align-items: center; gap: 4px; }
+
+  .add-topic-panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .topic-form { display: flex; gap: 10px; flex-wrap: wrap; }
+  .xp-bar-wrap { background: var(--bg3); border-radius: 50px; height: 6px; margin-top: 12px; overflow: hidden; }
+  .xp-bar { height: 100%; border-radius: 50px; background: linear-gradient(90deg,var(--accent),var(--teal)); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+
+  /* ═══════════════════════════════════
+     ANIMATIONS & MISC
+  ═══════════════════════════════════ */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+
+  .animate-in { animation: fadeUp 0.35s ease forwards; }
+  .animate-scale { animation: scaleIn 0.3s ease forwards; }
+
+  .section.active .content > * { animation: fadeUp 0.4s ease both; }
+  .section.active .content > *:nth-child(2) { animation-delay: 0.05s; }
+  .section.active .content > *:nth-child(3) { animation-delay: 0.1s; }
+  .section.active .content > *:nth-child(4) { animation-delay: 0.15s; }
+
+  .tooltip {
+    position: fixed;
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-xs);
+    padding: 6px 10px;
+    font-size: 11px;
+    color: var(--text);
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+    display: none;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(9,9,15,0.85);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 28px;
+    width: 400px;
+    max-width: 90vw;
+    animation: scaleIn 0.25s ease;
+  }
+  .modal-title { font-family: var(--font-head); font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--text3); margin-bottom: 20px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* Noise overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+      <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
+      <line x1="12" y1="22" x2="12" y2="15.5"/>
+      <polyline points="22 8.5 12 15.5 2 8.5"/>
+    </svg>
+  </div>
+  <div class="nav-sep"></div>
+  <button class="nav-btn active" data-section="memory">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span class="nav-label">ROOMS</span>
+  </button>
+  <button class="nav-btn" data-section="mood">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+    <span class="nav-label">MOOD</span>
+  </button>
+  <button class="nav-btn" data-section="planner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span class="nav-label">FUTURE</span>
+  </button>
+  <button class="nav-btn" data-section="focus">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span class="nav-label">FOCUS</span>
+  </button>
+  <button class="nav-btn" data-section="map">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    <span class="nav-label">MAP</span>
+  </button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- ─────────────── MODULE 1: MEMORY ROOMS ─────────────── -->
+  <section class="section active" id="memory">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="section-eyebrow">Module 01</span>
+        <span class="section-title">Memory Rooms</span>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-accent">Visual Recall</span>
+        <button class="btn btn-accent" id="open-recall-btn">⟳ Recall Mode</button>
+      </div>
+    </div>
+    <div class="content">
+      <p class="sub">Organize knowledge visually into rooms. Click a room to enter, add memories, and test recall.</p>
+
+      <div id="mem-panel" class="mem-panel"></div>
+
+      <div class="sh">Your Rooms</div>
+      <div class="rooms-grid" id="rooms-grid">
+        <div class="room-card c1" data-room="Physics">
+          <div>
+            <div class="room-icon">⚛️</div>
+            <div class="room-name">Physics</div>
+            <div class="room-count" id="cnt-Physics">0 memories</div>
+          </div>
+          <div class="room-preview" id="prev-Physics">No memories yet</div>
+        </div>
+        <div class="room-card c2" data-room="Math">
+          <div>
+            <div class="room-icon">∑</div>
+            <div class="room-name">Math</div>
+            <div class="room-count" id="cnt-Math">0 memories</div>
+          </div>
+          <div class="room-preview" id="prev-Math">No memories yet</div>
+        </div>
+        <div class="room-card c3" data-room="History">
+          <div>
+            <div class="room-icon">📜</div>
+            <div class="room-name">History</div>
+            <div class="room-count" id="cnt-History">0 memories</div>
+          </div>
+          <div class="room-preview" id="prev-History">No memories yet</div>
+        </div>
+        <div class="room-card c4" data-room="Languages">
+          <div>
+            <div class="room-icon">🌐</div>
+            <div class="room-name">Languages</div>
+            <div class="room-count" id="cnt-Languages">0 memories</div>
+          </div>
+          <div class="room-preview" id="prev-Languages">No memories yet</div>
+        </div>
+        <div class="room-card c5" data-room="Science">
+          <div>
+            <div class="room-icon">🧬</div>
+            <div class="room-name">Science</div>
+            <div class="room-count" id="cnt-Science">0 memories</div>
+          </div>
+          <div class="room-preview" id="prev-Science">No memories yet</div>
+        </div>
+        <button class="add-room-btn" id="add-room-trigger">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>New Room</span>
+        </button>
+      </div>
+
+      <!-- Recall Session -->
+      <div id="recall-session" style="display:none;">
+        <div class="sh">Recall Session</div>
+        <div class="recall-mode">
+          <div class="recall-card" id="recall-card">
+            <div class="rc-front">Click to reveal memory</div>
+            <div class="rc-back"></div>
+          </div>
+          <div class="recall-hint">TAP CARD TO REVEAL · USE ARROWS TO NAVIGATE</div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <button class="btn" id="prev-recall">← Prev</button>
+            <button class="btn btn-coral" id="forgot-btn">Forgot</button>
+            <button class="btn btn-teal" id="got-btn">Got it ✓</button>
+            <button class="btn" id="next-recall">Next →</button>
+          </div>
+          <div style="margin-top:12px;font-family:var(--font-mono);font-size:11px;color:var(--text3);" id="recall-progress"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── MODULE 2: STUDY MOOD ─────────────── -->
+  <section class="section" id="mood">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="section-eyebrow">Module 02</span>
+        <span class="section-title">Study Mood</span>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-teal">Adaptive Engine</span>
+      </div>
+    </div>
+    <div class="content">
+      <p class="sub">Your emotional state determines how your brain absorbs information. Select your current mood and get a personalized study blueprint.</p>
+
+      <div class="sh">How are you feeling right now?</div>
+      <div class="mood-selector">
+        <button class="mood-btn m-energized" data-mood="energized">
+          <span class="emoji">⚡</span><span class="mood-name">Energized</span>
+        </button>
+        <button class="mood-btn m-calm" data-mood="calm">
+          <span class="emoji">🌊</span><span class="mood-name">Calm</span>
+        </button>
+        <button class="mood-btn m-tired" data-mood="tired">
+          <span class="emoji">🌙</span><span class="mood-name">Tired</span>
+        </button>
+        <button class="mood-btn m-anxious" data-mood="anxious">
+          <span class="emoji">💫</span><span class="mood-name">Anxious</span>
+        </button>
+        <button class="mood-btn m-curious" data-mood="curious">
+          <span class="emoji">🔭</span><span class="mood-name">Curious</span>
+        </button>
+      </div>
+
+      <div class="mood-result" id="mood-result"></div>
+    </div>
+  </section>
+
+  <!-- ─────────────── MODULE 3: FUTURE PLANNER ─────────────── -->
+  <section class="section" id="planner">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="section-eyebrow">Module 03</span>
+        <span class="section-title">Future Planner</span>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-amber">Outcome Simulator</span>
+        <button class="btn btn-accent" id="run-sim">▶ Run Simulation</button>
+      </div>
+    </div>
+    <div class="content">
+      <p class="sub">Set your daily habits and watch the simulation project your future academic outcomes over time.</p>
+
+      <div class="sh">Dial Your Habits</div>
+      <div class="habit-builder">
+        <div class="habit-row">
+          <span class="habit-label">📚 Study Hours/day</span>
+          <input type="range" class="habit-slider" id="h-study" min="0" max="12" value="4" step="0.5">
+          <span class="habit-val" id="hv-study">4h</span>
+        </div>
+        <div class="habit-row">
+          <span class="habit-label">😴 Sleep Hours/night</span>
+          <input type="range" class="habit-slider" id="h-sleep" min="4" max="10" value="7" step="0.5">
+          <span class="habit-val" id="hv-sleep">7h</span>
+        </div>
+        <div class="habit-row">
+          <span class="habit-label">🏃 Exercise/week (days)</span>
+          <input type="range" class="habit-slider" id="h-exercise" min="0" max="7" value="3" step="1">
+          <span class="habit-val" id="hv-exercise">3d</span>
+        </div>
+        <div class="habit-row">
+          <span class="habit-label">📵 Phone-free (hrs/day)</span>
+          <input type="range" class="habit-slider" id="h-phone" min="0" max="10" value="3" step="0.5">
+          <span class="habit-val" id="hv-phone">3h</span>
+        </div>
+        <div class="habit-row">
+          <span class="habit-label">🔁 Review sessions/week</span>
+          <input type="range" class="habit-slider" id="h-review" min="0" max="14" value="5" step="1">
+          <span class="habit-val" id="hv-review">5×</span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="outcome-chart">
+          <div class="sh">Projected Mastery Over Time</div>
+          <div class="chart-bars" id="mastery-bars"></div>
+          <div class="chart-labels" id="mastery-labels"></div>
+          <div class="outcome-stats" id="outcome-stats"></div>
+        </div>
+        <div class="timeline-container">
+          <div class="sh">Your Future Timeline</div>
+          <div class="timeline" id="future-timeline"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── MODULE 4: FOCUS MODE ─────────────── -->
+  <section class="section" id="focus">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="section-eyebrow">Module 04</span>
+        <span class="section-title">Focus Mode</span>
+      </div>
+      <div class="topbar-right">
+        <div class="chip"><span class="dot"></span><span id="session-count-chip">0 sessions today</span></div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="grid-2" style="gap:20px;">
+        <div>
+          <div class="focus-hero">
+            <div class="timer-ring">
+              <svg width="200" height="200" viewBox="0 0 200 200">
+                <circle class="timer-ring-track" cx="100" cy="100" r="88"/>
+                <circle class="timer-ring-progress" id="ring-progress" cx="100" cy="100" r="88" stroke-dasharray="553" stroke-dashoffset="0"/>
+              </svg>
+              <div class="timer-display">
+                <span class="timer-time" id="timer-display">25:00</span>
+                <span class="timer-phase" id="timer-phase">READY</span>
+              </div>
+            </div>
+            <div class="focus-presets">
+              <button class="btn" data-min="25" data-label="Pomodoro">🍅 25 min</button>
+              <button class="btn" data-min="45" data-label="Deep Work">🧠 45 min</button>
+              <button class="btn" data-min="90" data-label="Flow State">🌊 90 min</button>
+              <button class="btn" data-min="5" data-label="Quick Sprint">⚡ 5 min</button>
+            </div>
+            <div class="focus-controls">
+              <button class="btn" id="focus-reset">↺ Reset</button>
+              <button class="btn btn-accent" id="focus-start" style="width:110px;">▶ Start</button>
+              <button class="btn" id="focus-skip">⏭ Skip</button>
+            </div>
+            <div style="margin-top:16px;">
+              <label style="font-size:12px;color:var(--text3);display:block;margin-bottom:8px;">Session Label</label>
+              <input type="text" id="session-label" placeholder="What are you working on?" style="text-align:center;">
+            </div>
+          </div>
+
+          <div class="focus-ambience">
+            <div class="sh">Ambience</div>
+            <div class="amb-grid">
+              <button class="amb-btn" data-sound="rain">
+                <div class="amb-icon">🌧️</div>
+                <div class="amb-name">Rain</div>
+              </button>
+              <button class="amb-btn" data-sound="forest">
+                <div class="amb-icon">🌲</div>
+                <div class="amb-name">Forest</div>
+              </button>
+              <button class="amb-btn" data-sound="cafe">
+                <div class="amb-icon">☕</div>
+                <div class="amb-name">Café</div>
+              </button>
+              <button class="amb-btn" data-sound="space">
+                <div class="amb-icon">🌌</div>
+                <div class="amb-name">Space</div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="session-log">
+          <div class="sh" style="margin-bottom:16px;">Session History</div>
+          <div id="session-entries">
+            <div style="text-align:center;padding:32px;color:var(--text3);font-size:13px;">
+              Complete a session to see it here
+            </div>
+          </div>
+          <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+            <div class="grid-2" style="gap:10px;">
+              <div class="ostat">
+                <div class="ostat-val" id="total-focus-min" style="color:var(--accent2);">0</div>
+                <div class="ostat-label">Total focus min</div>
+              </div>
+              <div class="ostat">
+                <div class="ostat-val" id="total-sessions" style="color:var(--teal);">0</div>
+                <div class="ostat-label">Sessions done</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────────── MODULE 5: LEARNING MAP ─────────────── -->
+  <section class="section" id="map">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="section-eyebrow">Module 05</span>
+        <span class="section-title">Learning Map</span>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-green" id="total-xp-badge">0 XP</span>
+        <button class="btn btn-teal" id="add-topic-btn">+ Add Topic</button>
+      </div>
+    </div>
+    <div class="content">
+      <div id="add-topic-panel" class="add-topic-panel" style="display:none;">
+        <div class="sh">Unlock a New Topic</div>
+        <div class="topic-form">
+          <input type="text" id="topic-name" placeholder="Topic name (e.g. Calculus)" style="flex:2;min-width:160px;">
+          <select id="topic-category" style="flex:1;min-width:120px;">
+            <option value="math">Mathematics</option>
+            <option value="science">Science</option>
+            <option value="lang">Language</option>
+            <option value="history">History</option>
+            <option value="code">Coding</option>
+            <option value="art">Arts</option>
+          </select>
+          <button class="btn btn-accent" id="submit-topic">Add to Map</button>
+          <button class="btn" id="cancel-topic">Cancel</button>
+        </div>
+      </div>
+
+      <div class="map-canvas-wrap">
+        <div class="sh">Your Knowledge Universe</div>
+        <div class="map-canvas" id="map-canvas">
+          <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" id="map-svg"></svg>
+        </div>
+      </div>
+
+      <div class="milestone-list">
+        <div class="sh" style="margin-bottom:16px;">Active Learning Paths</div>
+        <div id="milestone-list-inner">
+          <div style="text-align:center;padding:24px;color:var(--text3);font-size:13px;">Add topics to build your learning map</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-box">
+    <div class="modal-title" id="modal-title">New Room</div>
+    <div class="modal-sub" id="modal-sub">Give your memory room a name and choose an icon.</div>
+    <div id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+$(function(){
+  // ── NAV ──────────────────────────────────────────────────
+  $('.nav-btn').on('click',function(){
+    const s = $(this).data('section');
+    $('.nav-btn').removeClass('active');
+    $(this).addClass('active');
+    $('.section').removeClass('active');
+    $('#'+s).addClass('active');
+  });
+
+  // ═══════════════════════════════════
+  //  MODULE 1: MEMORY ROOMS
+  // ═══════════════════════════════════
+  let memories = { Physics:[], Math:[], History:[], Languages:[], Science:[] };
+  let currentRoom = null;
+
+  function updateRoomMeta(room){
+    const items = memories[room]||[];
+    $('#cnt-'+room).text(items.length + ' memor'+(items.length===1?'y':'ies'));
+    $('#prev-'+room).text(items.length ? items[items.length-1].text : 'No memories yet');
+  }
+
+  function openRoom(room){
+    currentRoom = room;
+    const col = {Physics:'accent2',Math:'teal',History:'coral',Languages:'amber',Science:'green'}[room]||'accent2';
+    const mems = memories[room]||[];
+    let cardsHtml = mems.length ? mems.map((m,i)=>`
+      <div class="memory-item animate-in">
+        <div class="mi-tag">#${i+1} · ${m.tag||'note'}</div>
+        <div class="mi-text">${m.text}</div>
+        <button class="mi-del" data-idx="${i}">×</button>
+      </div>`).join('') : `<div style="color:var(--text3);font-size:13px;padding:12px;">No memories yet — add your first one below.</div>`;
+
+    $('#mem-panel').html(`
+      <div class="mem-panel-header">
+        <div class="mem-panel-title">${room}</div>
+        <button class="btn" id="close-room">✕ Close</button>
+      </div>
+      <div class="memory-cards-grid" id="mem-cards">${cardsHtml}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input type="text" id="new-mem-tag" placeholder="Tag (e.g. formula, date...)" style="flex:1;min-width:100px;">
+        <input type="text" id="new-mem-text" placeholder="Add a memory or key concept..." style="flex:3;min-width:160px;">
+        <button class="btn btn-accent" id="add-mem-btn">+ Add</button>
+      </div>
+    `).addClass('open');
+
+    $('#close-room').on('click',()=>{ currentRoom=null; $('#mem-panel').removeClass('open').html(''); });
+    $('#add-mem-btn').on('click', addMemory);
+    $('#new-mem-text').on('keypress',function(e){ if(e.which===13) addMemory(); });
+    $(document).on('click','.mi-del',function(){
+      const idx=$(this).data('idx');
+      memories[currentRoom].splice(idx,1);
+      updateRoomMeta(currentRoom);
+      openRoom(currentRoom);
+    });
+  }
+
+  function addMemory(){
+    const text=$('#new-mem-text').val().trim();
+    const tag=$('#new-mem-tag').val().trim()||'note';
+    if(!text||!currentRoom) return;
+    memories[currentRoom].push({text,tag});
+    updateRoomMeta(currentRoom);
+    openRoom(currentRoom);
+  }
+
+  $(document).on('click','.room-card',function(){
+    openRoom($(this).data('room'));
+  });
+
+  // Add Room Modal
+  const colors = ['c1','c2','c3','c4','c5'];
+  const icons = ['📖','🎨','🏛️','💻','🔬','🎵','🌍','✏️','🚀','🧮'];
+  let newRoomColor = 'c1', newRoomIcon = '📖';
+
+  $('#add-room-trigger').on('click',function(){
+    $('#modal-title').text('Create a New Room');
+    $('#modal-sub').text('Name your memory room and choose a style.');
+    $('#modal-body').html(`
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px;">Room Name</label>
+        <input type="text" id="new-room-name" placeholder="e.g. Chemistry, Philosophy...">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:8px;">Icon</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">${icons.map(ic=>`<button class="icon-sel btn" data-icon="${ic}" style="width:40px;height:40px;padding:0;font-size:18px;">${ic}</button>`).join('')}</div>
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:8px;">Color Theme</label>
+        <div style="display:flex;gap:8px;">${colors.map(c=>`<button class="color-sel" data-color="${c}" style="width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;background:var(--${c==='c1'?'accent':c==='c2'?'teal':c==='c3'?'coral':c==='c4'?'amber':'green'});transition:0.2s;"></button>`).join('')}</div>
+      </div>
+    `);
+    $('#modal-actions').html(`<button class="btn" id="modal-cancel">Cancel</button><button class="btn btn-accent" id="modal-confirm">Create Room</button>`);
+    $('#modal-overlay').addClass('open');
+
+    $(document).on('click','.icon-sel',function(){ newRoomIcon=$(this).data('icon'); $('.icon-sel').css('border-color','var(--border2)'); $(this).css('border-color','var(--accent)'); });
+    $(document).on('click','.color-sel',function(){ newRoomColor=$(this).data('color'); $('.color-sel').css('border-color','transparent'); $(this).css('border-color','white'); });
+
+    $('#modal-cancel').on('click',closeModal);
+    $('#modal-confirm').on('click',function(){
+      const name=$('#new-room-name').val().trim();
+      if(!name) return;
+      memories[name]=[];
+      const card=`<div class="room-card ${newRoomColor} animate-in" data-room="${name}">
+        <div><div class="room-icon">${newRoomIcon}</div><div class="room-name">${name}</div><div class="room-count" id="cnt-${name}">0 memories</div></div>
+        <div class="room-preview" id="prev-${name}">No memories yet</div>
+      </div>`;
+      $('.add-room-btn').before(card);
+      closeModal();
+    });
+  });
+
+  function closeModal(){ $('#modal-overlay').removeClass('open'); }
+  $('#modal-overlay').on('click',function(e){ if($(e.target).is('#modal-overlay')) closeModal(); });
+
+  // Recall Mode
+  let recallIdx=0, recallData=[], recallScores={};
+  $('#open-recall-btn').on('click',function(){
+    recallData=[];
+    Object.keys(memories).forEach(r=>{ memories[r].forEach(m=>recallData.push({room:r,...m})); });
+    if(!recallData.length){ alert('Add some memories to rooms first!'); return; }
+    recallIdx=0; recallScores={};
+    $('#recall-session').show();
+    showRecallCard();
+    $('html,body').animate({scrollTop:$('#recall-session').offset().top-80},400);
+  });
+
+  function showRecallCard(){
+    if(!recallData.length) return;
+    const d=recallData[recallIdx];
+    $('#recall-card').removeClass('flipped');
+    $('#recall-card .rc-front').text(`[${d.room}] ${d.tag}`);
+    $('#recall-card .rc-back').text(d.text);
+    $('#recall-progress').text(`Card ${recallIdx+1} of ${recallData.length}`);
+  }
+
+  $('#recall-card').on('click',()=>$('#recall-card').toggleClass('flipped'));
+  $('#prev-recall').on('click',()=>{ recallIdx=Math.max(0,recallIdx-1); showRecallCard(); });
+  $('#next-recall').on('click',()=>{ recallIdx=Math.min(recallData.length-1,recallIdx+1); showRecallCard(); });
+  $('#got-btn').on('click',()=>{ recallScores[recallIdx]='got'; $('#next-recall').trigger('click'); });
+  $('#forgot-btn').on('click',()=>{ recallScores[recallIdx]='forgot'; $('#next-recall').trigger('click'); });
+
+  // ═══════════════════════════════════
+  //  MODULE 2: STUDY MOOD
+  // ═══════════════════════════════════
+  const moodData = {
+    energized: {
+      label:'⚡ Energized', cls:'e',
+      headline:'You\'re in peak state — go hard.',
+      tagline:'Your dopamine is firing. Attack difficult material now.',
+      color:'accent2',
+      methods:[
+        {icon:'🧩',bg:'rgba(124,106,247,0.15)',name:'Active Problem Solving',desc:'Tackle hardest problems first. Your working memory is at full capacity.'},
+        {icon:'⚔️',bg:'rgba(124,106,247,0.1)',name:'Feynman Technique',desc:'Pick a complex concept and teach it as if explaining to a 10-year-old.'},
+        {icon:'🏋️',bg:'rgba(124,106,247,0.08)',name:'Interleaving Practice',desc:'Switch between 3 subjects every 30 min to maximize neural encoding.'},
+      ],
+      env:{light:'Bright (6500K)',sound:'Lo-fi or silence',temp:'Cool (18–20°C)'}
+    },
+    calm: {
+      label:'🌊 Calm', cls:'c',
+      headline:'Steady mind, deep absorption.',
+      tagline:'Perfect for comprehension and long reading. Go slow and thorough.',
+      color:'teal',
+      methods:[
+        {icon:'📖',bg:'rgba(45,212,191,0.15)',name:'SQ3R Reading Method',desc:'Survey, Question, Read, Recite, Review. Ideal for textbooks.'},
+        {icon:'🗺️',bg:'rgba(45,212,191,0.1)',name:'Concept Mapping',desc:'Draw relationships between ideas. Calm states boost spatial memory.'},
+        {icon:'✍️',bg:'rgba(45,212,191,0.08)',name:'Elaborate Notetaking',desc:'Write summaries in your own words immediately after each section.'},
+      ],
+      env:{light:'Warm (4000K)',sound:'Ambient nature sounds',temp:'Comfortable (21°C)'}
+    },
+    tired: {
+      label:'🌙 Tired', cls:'t',
+      headline:'Rest your engine. Learn lighter.',
+      tagline:'Don\'t fight fatigue — work with it. Consolidation over acquisition.',
+      color:'amber',
+      methods:[
+        {icon:'🔁',bg:'rgba(251,191,36,0.15)',name:'Spaced Repetition Review',desc:'Review flashcards of old material. Tired brains consolidate better than they create.'},
+        {icon:'🎧',bg:'rgba(251,191,36,0.1)',name:'Passive Listening',desc:'Listen to recorded lectures or podcasts at 1x speed.'},
+        {icon:'🗒️',bg:'rgba(251,191,36,0.08)',name:'Mind Dump',desc:'Write everything you know about a topic without looking. Clears mental RAM.'},
+      ],
+      env:{light:'Warm dim (2700K)',sound:'Binaural beats (alpha 10Hz)',temp:'Warm (22–24°C)'}
+    },
+    anxious: {
+      label:'💫 Anxious', cls:'a',
+      headline:'Ground first. Then learn.',
+      tagline:'Anxiety shrinks working memory. Start small and structured.',
+      color:'coral',
+      methods:[
+        {icon:'🧱',bg:'rgba(251,113,133,0.15)',name:'Micro-Chunking',desc:'Break any topic into 10-minute pieces. Complete one then decide next step.'},
+        {icon:'📋',bg:'rgba(251,113,133,0.1)',name:'Guided Outline Study',desc:'Use a rigid outline. Anxiety thrives on ambiguity — eliminate it.'},
+        {icon:'🔢',bg:'rgba(251,113,133,0.08)',name:'Counting Review',desc:'Memorize lists, dates, formulas — mechanical tasks that calm the nervous system.'},
+      ],
+      env:{light:'Soft warm (3000K)',sound:'White noise or rain',temp:'Neutral (20–21°C)'}
+    },
+    curious: {
+      label:'🔭 Curious', cls:'u',
+      headline:'Follow the rabbit hole.',
+      tagline:'Your brain is in exploration mode. Let it roam — and capture everything.',
+      color:'green',
+      methods:[
+        {icon:'🌐',bg:'rgba(74,222,128,0.15)',name:'Deep Dive Research',desc:'Pick one question and explore it from 4 different angles or sources.'},
+        {icon:'🔗',bg:'rgba(74,222,128,0.1)',name:'Cross-domain Connection',desc:'Find links between today\'s topic and something totally unrelated.'},
+        {icon:'🧪',bg:'rgba(74,222,128,0.08)',name:'Hypothesis Testing',desc:'Form a theory about something you don\'t yet know. Then verify it.'},
+      ],
+      env:{light:'Natural or daylight (5000K)',sound:'Minimal or instrumental',temp:'Slightly cool (19°C)'}
+    }
+  };
+
+  $('.mood-btn').on('click',function(){
+    const mood=$(this).data('mood');
+    const d=moodData[mood];
+    $('.mood-btn').removeClass('selected');
+    $(this).addClass('selected');
+
+    const methodsHtml=d.methods.map(m=>`
+      <div class="method-card">
+        <div class="method-icon" style="background:${m.bg}">${m.icon}</div>
+        <div class="method-body">
+          <div class="method-name">${m.name}</div>
+          <div class="method-desc">${m.desc}</div>
+        </div>
+      </div>`).join('');
+
+    $('#mood-result').html(`
+      <div class="mood-result-hero ${d.cls}">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <span class="badge badge-${d.color==='accent2'?'accent':d.color==='teal'?'teal':d.color==='amber'?'amber':d.color==='coral'?'coral':'green'}">${d.label}</span>
+        </div>
+        <div style="font-family:var(--font-head);font-size:22px;font-weight:800;margin-bottom:6px;">${d.headline}</div>
+        <div style="font-size:13px;color:var(--text3);">${d.tagline}</div>
+      </div>
+      <div class="sh">Recommended Methods</div>
+      ${methodsHtml}
+      <div class="sh" style="margin-top:20px;">Ideal Environment</div>
+      <div class="env-row">
+        <div class="env-card"><div class="env-label">Lighting</div><div class="env-val">${d.env.light}</div></div>
+        <div class="env-card"><div class="env-label">Sound</div><div class="env-val">${d.env.sound}</div></div>
+        <div class="env-card"><div class="env-label">Temperature</div><div class="env-val">${d.env.temp}</div></div>
+      </div>
+    `).addClass('visible');
+  });
+
+  // ═══════════════════════════════════
+  //  MODULE 3: FUTURE PLANNER
+  // ═══════════════════════════════════
+  function getHabits(){
+    return {
+      study: parseFloat($('#h-study').val()),
+      sleep: parseFloat($('#h-sleep').val()),
+      exercise: parseInt($('#h-exercise').val()),
+      phone: parseFloat($('#h-phone').val()),
+      review: parseInt($('#h-review').val())
+    };
+  }
+
+  function calcScore(h){
+    let s=0;
+    s += Math.min(h.study*8, 60);
+    s += h.sleep>=7&&h.sleep<=9 ? 15 : h.sleep>=6 ? 8 : 2;
+    s += h.exercise>=4 ? 12 : h.exercise>=2 ? 8 : 3;
+    s += Math.min(h.phone*4, 10);
+    s += Math.min(h.review*1.5, 10);
+    return Math.min(Math.round(s), 100);
+  }
+
+  function runSimulation(){
+    const h=getHabits();
+    const baseScore=calcScore(h);
+    const months=['1M','2M','3M','6M','9M','1Y','18M','2Y'];
+    const growth=[0.3,0.45,0.55,0.68,0.78,0.87,0.93,1.0];
+    const barColors=['#7c6af7','#8b7af8','#9a8af9','#a39afa','#2dd4bf','#4de8d4','#6deede','#90f3e8'];
+
+    const barsHtml=months.map((m,i)=>{
+      const h2=Math.round(baseScore*growth[i]);
+      const ht=Math.round((h2/100)*100);
+      return `<div class="chart-bar" data-val="${h2}%" style="height:${ht}%;background:${barColors[i]};opacity:${0.5+i*0.07};" title="${m}: ${h2}%"></div>`;
+    }).join('');
+    const labelsHtml=months.map(m=>`<div class="chart-label">${m}</div>`).join('');
+    $('#mastery-bars').html(barsHtml);
+    $('#mastery-labels').html(labelsHtml);
+
+    const grade=baseScore>=85?'A+':baseScore>=75?'A':baseScore>=65?'B+':baseScore>=55?'B':'C';
+    const rank=baseScore>=85?'Top 5%':baseScore>=70?'Top 20%':baseScore>=55?'Top 40%':'Average';
+    const retention=Math.round(baseScore*0.88);
+    $('#outcome-stats').html(`
+      <div class="ostat"><div class="ostat-val" style="color:var(--accent2);">${grade}</div><div class="ostat-label">Projected grade</div></div>
+      <div class="ostat"><div class="ostat-val" style="color:var(--teal);">${rank}</div><div class="ostat-label">Class rank</div></div>
+      <div class="ostat"><div class="ostat-val" style="color:var(--green);">${retention}%</div><div class="ostat-label">Retention rate</div></div>
+    `);
+
+    const msgs=[];
+    if(h.study>=6) msgs.push({t:'30 Days',title:'Study Momentum',desc:'Consistent deep study starts showing measurable recall improvements.',c:'#7c6af7'});
+    else msgs.push({t:'30 Days',title:'Building Baseline',desc:'Consistent study is forming the neural scaffolding needed for growth.',c:'#7c6af7'});
+    if(h.sleep>=7) msgs.push({t:'3 Months',title:'Memory Consolidation Peak',desc:'Great sleep is compounding — your brain is filing and filing. Recall sharpens.',c:'#2dd4bf'});
+    else msgs.push({t:'3 Months',title:'Sleep Debt Warning',desc:'Sleep under 7h will cap long-term retention. Consider adjustment.',c:'#fb7185'});
+    if(h.exercise>=3) msgs.push({t:'6 Months',title:'Neurogenesis Boost',desc:'Regular exercise is generating new neurons in your hippocampus.',c:'#4ade80'});
+    msgs.push({t:'1 Year',title:`${grade} Grade Territory`,desc:`At this rate, you\'re projecting ${grade} performance and ${rank} class ranking.`,c:'#fbbf24'});
+    if(baseScore>=80) msgs.push({t:'2 Years',title:'Mastery-Level Outcomes',desc:'Your habit stack puts you in scholarship and honors territory.',c:'#4ade80'});
+    else msgs.push({t:'2 Years',title:'Solid Foundation',desc:'Steady progress. Small habit improvements now compound dramatically.',c:'#fbbf24'});
+
+    const tlHtml=msgs.map(m=>`
+      <div class="tl-item animate-in">
+        <div class="tl-dot" style="background:${m.c};"></div>
+        <div class="tl-time">${m.t}</div>
+        <div class="tl-title">${m.title}</div>
+        <div class="tl-desc">${m.desc}</div>
+      </div>`).join('');
+    $('#future-timeline').html(tlHtml);
+  }
+
+  // Slider live updates
+  [['h-study','hv-study','h'],['h-sleep','hv-sleep','h'],['h-exercise','hv-exercise','d'],['h-phone','hv-phone','h'],['h-review','hv-review','×']].forEach(([id,vid,unit])=>{
+    $('#'+id).on('input',function(){ $('#'+vid).text($(this).val()+unit); });
+  });
+
+  $('#run-sim').on('click', runSimulation);
+  runSimulation(); // initial
+
+  // ═══════════════════════════════════
+  //  MODULE 4: FOCUS MODE
+  // ═══════════════════════════════════
+  let focusInterval=null, focusSecs=25*60, focusTotalSecs=25*60, focusRunning=false, focusPhase='WORK';
+  let todaySessions=0, totalFocusMin=0;
+  const circumference=553;
+
+  function updateRing(){
+    const pct=1-(focusSecs/focusTotalSecs);
+    const offset=circumference-(pct*circumference);
+    $('#ring-progress').attr('stroke-dashoffset',Math.max(0,offset));
+  }
+
+  function updateDisplay(){
+    const m=String(Math.floor(focusSecs/60)).padStart(2,'0');
+    const s=String(focusSecs%60).padStart(2,'0');
+    $('#timer-display').text(`${m}:${s}`);
+  }
+
+  function setPreset(min,label){
+    clearInterval(focusInterval);
+    focusRunning=false;
+    focusSecs=min*60;
+    focusTotalSecs=min*60;
+    focusPhase=label||'WORK';
+    updateDisplay();
+    updateRing();
+    $('#timer-phase').text('READY');
+    $('#focus-start').text('▶ Start');
+    $('#ring-progress').attr('stroke','var(--accent)');
+  }
+
+  $('[data-min]').on('click',function(){ setPreset($(this).data('min'),$(this).data('label')); });
+
+  $('#focus-start').on('click',function(){
+    if(focusRunning){
+      clearInterval(focusInterval);
+      focusRunning=false;
+      $(this).text('▶ Resume');
+      $('#timer-phase').text('PAUSED');
+    } else {
+      focusRunning=true;
+      $(this).text('⏸ Pause');
+      $('#timer-phase').text(focusPhase.toUpperCase());
+      focusInterval=setInterval(function(){
+        focusSecs--;
+        updateDisplay();
+        updateRing();
+        if(focusSecs<=0){
+          clearInterval(focusInterval);
+          focusRunning=false;
+          completeSession();
+        }
+      },1000);
+    }
+  });
+
+  $('#focus-reset').on('click',()=>{ setPreset(focusTotalSecs/60, focusPhase); });
+  $('#focus-skip').on('click',()=>{ clearInterval(focusInterval); focusRunning=false; completeSession(); });
+
+  function completeSession(){
+    const label=$('#session-label').val().trim()||'Unnamed session';
+    const dur=Math.round((focusTotalSecs-focusSecs)/60)||Math.round(focusTotalSecs/60);
+    todaySessions++;
+    totalFocusMin+=dur;
+    $('#session-count-chip').text(todaySessions+' session'+(todaySessions===1?'':'s')+' today');
+    $('#total-sessions').text(todaySessions);
+    $('#total-focus-min').text(totalFocusMin);
+
+    const now=new Date();
+    const timeStr=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const entry=`
+      <div class="session-entry animate-in">
+        <div class="se-icon">🎯</div>
+        <div class="se-body">
+          <div class="se-label">${label}</div>
+          <div class="se-meta">${timeStr} · ${focusPhase}</div>
+        </div>
+        <div class="se-duration">${dur}m</div>
+      </div>`;
+    const existing=$('#session-entries').children('.session-entry');
+    if($('#session-entries').children('div[style]').length) $('#session-entries').html('');
+    $('#session-entries').prepend(entry);
+
+    $('#timer-phase').text('DONE ✓');
+    $('#ring-progress').attr('stroke','var(--green)');
+    setPreset(focusTotalSecs/60, focusPhase);
+  }
+
+  // Ambience (visual only — no actual audio in single file)
+  $('.amb-btn').on('click',function(){
+    const wasOn=$(this).hasClass('on');
+    $('.amb-btn').removeClass('on');
+    if(!wasOn) $(this).addClass('on');
+  });
+
+  // ═══════════════════════════════════
+  //  MODULE 5: LEARNING MAP
+  // ═══════════════════════════════════
+  let topics=[];
+  let totalXP=0;
+
+  const catColors={math:'accent',science:'teal',lang:'coral',history:'amber',code:'green',art:'coral'};
+  const catEmojis={math:'∑',science:'⚛',lang:'Aa',history:'📜',code:'</>',art:'🎨'};
+  const nodeColors={accent:'#7c6af7',teal:'#2dd4bf',coral:'#fb7185',amber:'#fbbf24',green:'#4ade80'};
+
+  function getNodePos(i,total){
+    if(total===1) return {x:50,y:50};
+    const center={x:50,y:50};
+    const radius=32;
+    const angle=(i/total)*2*Math.PI - Math.PI/2;
+    return { x: center.x+radius*Math.cos(angle), y: center.y+radius*Math.sin(angle) };
+  }
+
+  function renderMap(){
+    $('#map-canvas').find('.map-node').remove();
+    const svg=$('#map-svg')[0];
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+    if(!topics.length){
+      $('#map-canvas').find('.map-empty').remove();
+      $('<div class="map-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--text3);font-size:13px;">').html('<div style="font-size:32px;margin-bottom:8px;">🌌</div><div>Your universe is empty — add a topic to begin.</div>').appendTo('#map-canvas');
+      return;
+    }
+    $('#map-canvas').find('.map-empty').remove();
+
+    const cw=$('#map-canvas').width();
+    const ch=$('#map-canvas').height();
+
+    // Draw connectors
+    if(topics.length>1){
+      for(let i=0;i<topics.length;i++){
+        const a=getNodePos(i,topics.length);
+        const b=getNodePos((i+1)%topics.length,topics.length);
+        const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1',`${a.x}%`); line.setAttribute('y1',`${a.y}%`);
+        line.setAttribute('x2',`${b.x}%`); line.setAttribute('y2',`${b.y}%`);
+        line.setAttribute('stroke','rgba(255,255,255,0.06)');
+        line.setAttribute('stroke-width','1');
+        line.setAttribute('stroke-dasharray','4 4');
+        svg.appendChild(line);
+      }
+    }
+
+    topics.forEach((t,i)=>{
+      const pos=getNodePos(i,topics.length);
+      const col=nodeColors[catColors[t.cat]]||'#7c6af7';
+      const size=48+Math.round(t.progress/10)*4;
+      const node=$(`
+        <div class="map-node animate-scale" data-idx="${i}" style="
+          left:calc(${pos.x}% - ${size/2}px);
+          top:calc(${pos.y}% - ${size/2}px);
+          width:${size}px; height:${size}px;
+          background:${col}22;
+          border:2px solid ${col}66;
+          color:${col};
+          font-size:${size>56?'16px':'13px'};
+          font-weight:700;
+        ">
+          <span>${catEmojis[t.cat]||'📚'}</span>
+          <div class="mn-label">${t.name}</div>
+        </div>`);
+      node.on('click',function(){
+        const idx=$(this).data('idx');
+        const topic=topics[idx];
+        topic.progress=Math.min(100,topic.progress+10);
+        topic.xp+=15;
+        totalXP+=15;
+        updateXPBadge();
+        renderMap();
+        renderMilestones();
+      });
+      $('#map-canvas').append(node);
+    });
+  }
+
+  function renderMilestones(){
+    if(!topics.length){ $('#milestone-list-inner').html('<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px;">Add topics to build your learning map</div>'); return; }
+    const html=topics.map((t,i)=>{
+      const col=nodeColors[catColors[t.cat]]||'#7c6af7';
+      const r=20; const circ=2*Math.PI*r;
+      const offset=circ-(t.progress/100)*circ;
+      return `
+        <div class="ms-item" data-idx="${i}">
+          <div class="ms-ring">
+            <svg viewBox="0 0 44 44" width="44" height="44">
+              <circle cx="22" cy="22" r="${r}" fill="none" stroke="var(--bg4)" stroke-width="3"/>
+              <circle cx="22" cy="22" r="${r}" fill="none" stroke="${col}" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="${circ}" stroke-dashoffset="${offset}" transform="rotate(-90 22 22)"/>
+            </svg>
+            <div class="pct" style="color:${col};font-size:10px;">${t.progress}%</div>
+          </div>
+          <div class="ms-body">
+            <div class="ms-title">${t.name}</div>
+            <div class="ms-sub">${t.cat.charAt(0).toUpperCase()+t.cat.slice(1)} · Click node on map to progress</div>
+            <div class="xp-bar-wrap" style="width:160px;"><div class="xp-bar" style="width:${t.progress}%;background:${col};"></div></div>
+          </div>
+          <div class="ms-xp">+${t.xp} XP</div>
+        </div>`;
+    }).join('');
+    $('#milestone-list-inner').html(html);
+  }
+
+  function updateXPBadge(){
+    $('#total-xp-badge').text(totalXP+' XP');
+  }
+
+  $('#add-topic-btn').on('click',()=>{ $('#add-topic-panel').toggle(); });
+  $('#cancel-topic').on('click',()=>{ $('#add-topic-panel').hide(); });
+
+  $('#submit-topic').on('click',function(){
+    const name=$('#topic-name').val().trim();
+    const cat=$('#topic-category').val();
+    if(!name) return;
+    topics.push({name,cat,progress:0,xp:0});
+    $('#topic-name').val('');
+    $('#add-topic-panel').hide();
+    renderMap();
+    renderMilestones();
+  });
+
+  // Initial renders
+  renderMap();
+  renderMilestones();
+
+  // ── GLOBAL TOOLTIP ──
+  $('[title]').on('mouseenter',function(e){
+    const t=$(this).attr('title');
+    if(!t) return;
+    $('#tooltip').text(t).css({left:e.pageX+12,top:e.pageY-28}).show();
+    $(this).attr('data-title',t).removeAttr('title');
+  }).on('mouseleave',function(){
+    $('#tooltip').hide();
+    $(this).attr('title',$(this).attr('data-title')).removeAttr('data-title');
+  }).on('mousemove',function(e){
+    $('#tooltip').css({left:e.pageX+12,top:e.pageY-28});
+  });
+
+});
+</script>
+</body>
+</html>
